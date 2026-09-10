@@ -2035,9 +2035,10 @@ private struct CardGridLayout: View {
                     if showsResetBelow {
                         Text(model.formattedResetTime ?? "—")
                             .font(.system(size: 9, design: .rounded))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.tertiary)
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.trailing, 8)
                     }
                 }
             }

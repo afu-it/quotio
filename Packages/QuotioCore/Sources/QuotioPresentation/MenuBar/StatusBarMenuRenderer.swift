@@ -1996,36 +1996,42 @@ private struct CardGridLayout: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(models, id: \.name) { (model: ModelBadgeData) in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: columnCount == 3 ? 4 : nil) {
-                        Text(model.name)
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                        Spacer(minLength: columnCount == 3 ? 0 : nil)
-                        if !showsResetBelow, let resetTime = model.formattedResetTime {
-                            Text(resetTime)
-                                .font(.system(size: 9, design: .rounded))
-                                .foregroundStyle(.tertiary)
+                VStack(alignment: .trailing, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: columnCount == 3 ? 4 : nil) {
+                            Text(model.name)
+                                .font(.system(size: 10, weight: .medium, design: .rounded))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Spacer(minLength: columnCount == 3 ? 0 : nil)
+                            if !showsResetBelow, let resetTime = model.formattedResetTime {
+                                Text(resetTime)
+                                    .font(.system(size: 9, design: .rounded))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            if let usage = model.usage {
+                                Text(usage)
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(.primary)
+                            } else {
+                                Text(menuPercentText(remainingPercent: model.percentage, displayMode: displayMode))
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(menuStatusColor(remainingPercent: model.percentage, displayMode: displayMode))
+                            }
                         }
-                        if let usage = model.usage {
-                            Text(usage)
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundStyle(.primary)
-                        } else {
-                            Text(menuPercentText(remainingPercent: model.percentage, displayMode: displayMode))
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundStyle(menuStatusColor(remainingPercent: model.percentage, displayMode: displayMode))
-                        }
-                    }
 
-                    if model.usage == nil {
-                        ModernProgressBar(
-                            percentage: model.percentage,
-                            height: 4,
-                            displayMode: displayMode
-                        )
+                        if model.usage == nil {
+                            ModernProgressBar(
+                                percentage: model.percentage,
+                                height: 4,
+                                displayMode: displayMode
+                            )
+                        }
                     }
+                    .padding(8)
+                    .background(Color.secondary.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .menuNativeTooltip(model.name + (model.formattedResetTime.map { " · " + $0 } ?? ""))
                     if showsResetBelow {
                         Text(model.formattedResetTime ?? "—")
                             .font(.system(size: 9, design: .rounded))
@@ -2034,10 +2040,6 @@ private struct CardGridLayout: View {
                             .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
-                .padding(8)
-                .background(Color.secondary.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .menuNativeTooltip(model.name + (model.formattedResetTime.map { " · " + $0 } ?? ""))
             }
         }
     }

@@ -756,7 +756,9 @@ private struct MenuAccountCardView: View {
             
             quotaContentSection
             
-            footerSection
+            if provider != .claude {
+                footerSection
+            }
         }
         .padding(12)
         .background(
@@ -784,6 +786,14 @@ private struct MenuAccountCardView: View {
                 .lineLimit(1)
             
             Spacer()
+
+            if provider == .claude {
+                Text(data.lastUpdated.formatted(.relative(presentation: .named)))
+                    .font(.system(size: 9, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
 
             Button(action: onRefresh) {
                 if isRefreshing {
@@ -908,7 +918,7 @@ private struct MenuAccountCardView: View {
                     }
                 }
             } else if provider == .claude && settings.showClaudeFableWeekly && isCardStyle {
-                CardGridLayout(models: models, displayMode: settings.quotaDisplayMode, columnCount: 3)
+                CardGridLayout(models: models, displayMode: settings.quotaDisplayMode, columnCount: 3, showsResetBelow: true)
             } else if !models.isEmpty {
                 quotaLayout(models: models)
             }
@@ -938,7 +948,7 @@ private struct MenuAccountCardView: View {
         case .ring:
             RingGridLayout(models: models, displayMode: settings.quotaDisplayMode)
         case .card:
-            CardGridLayout(models: models, displayMode: settings.quotaDisplayMode)
+            CardGridLayout(models: models, displayMode: settings.quotaDisplayMode, showsResetBelow: provider == .claude)
         }
     }
     
@@ -1977,6 +1987,7 @@ private struct CardGridLayout: View {
     let models: [ModelBadgeData]
     let displayMode: QuotaDisplayMode
     var columnCount: Int = 2
+    var showsResetBelow: Bool = false
 
     private var columns: [GridItem] {
         Array(repeating: GridItem(.flexible()), count: min(max(models.count, 1), columnCount))
@@ -1992,7 +2003,7 @@ private struct CardGridLayout: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                         Spacer(minLength: columnCount == 3 ? 0 : nil)
-                        if columnCount < 3, let resetTime = model.formattedResetTime {
+                        if !showsResetBelow, let resetTime = model.formattedResetTime {
                             Text(resetTime)
                                 .font(.system(size: 9, design: .rounded))
                                 .foregroundStyle(.tertiary)
@@ -2014,6 +2025,13 @@ private struct CardGridLayout: View {
                             height: 4,
                             displayMode: displayMode
                         )
+                    }
+                    if showsResetBelow {
+                        Text(model.formattedResetTime ?? "—")
+                            .font(.system(size: 9, design: .rounded))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
                 .padding(8)
